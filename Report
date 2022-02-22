@@ -62,43 +62,44 @@
 -- +--------------+--------------+--------------+
 
 
-22/02/2022
+22/02/2022 --- try 1  ------
 
 
-select 'Success' as period_state , startdate, case 
-when lead is null then startdate 
-when lead is not null then lead 
-end as enddate   from 
-(
-select success_date as startdate, 
-lead(success_date,1) OVER (ORDER BY success_date) as LEAD, 
-datediff(day, success_date,lead(success_date,1) OVER (ORDER BY success_date)) as chk
-from Succeeded
-where success_date between '2019-01-01' and '2019-12-31'
-) as t1
-where chk=1 or chk is null
-union all
-select 'Failed' as period_state , startdate, case 
-when lead is null then startdate 
-when lead is not null then lead 
-end as enddate   from 
-(
-select faildate as startdate, 
-lead(faildate,1) OVER (ORDER BY faildate) as LEAD, 
-datediff(day, faildate,lead(faildate,1) OVER (ORDER BY faildate)) as chk
-from failed
-where faildate between '2019-01-01' and '2019-12-31'
-) as t1
-where chk=1 or chk is null
-order by 2                     
-                                  
-                                  
-                                  
-                                  
-                         
-
-
-
-
-
+SELECT 'Success' AS period_state,
+       startdate,
+       CASE
+         WHEN lead IS NULL THEN startdate
+         WHEN lead IS NOT NULL THEN lead
+       END       AS enddate
+FROM   (SELECT success_date                                            AS
+               startdate,
+               Lead(success_date, 1)
+                 OVER (
+                   ORDER BY success_date)                              AS LEAD,
+               Datediff(day, success_date, Lead(success_date, 1)
+                                             OVER (
+                                               ORDER BY success_date)) AS chk
+        FROM   succeeded
+        WHERE  success_date BETWEEN '2019-01-01' AND '2019-12-31') AS t1
+WHERE  chk = 1
+        OR chk IS NULL
+UNION ALL
+SELECT 'Failed' AS period_state,
+       startdate,
+       CASE
+         WHEN lead IS NULL THEN startdate
+         WHEN lead IS NOT NULL THEN lead
+       END      AS enddate
+FROM   (SELECT faildate                                        AS startdate,
+               Lead(faildate, 1)
+                 OVER (
+                   ORDER BY faildate)                          AS LEAD,
+               Datediff(day, faildate, Lead(faildate, 1)
+                                         OVER (
+                                           ORDER BY faildate)) AS chk
+        FROM   failed
+        WHERE  faildate BETWEEN '2019-01-01' AND '2019-12-31') AS t1
+WHERE  chk = 1
+        OR chk IS NULL
+ORDER  BY 2 
 
