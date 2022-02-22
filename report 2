@@ -1,0 +1,82 @@
+get a count of consecutive year from the latest year and then a distinct count of total number of years each account has made a transaction. 
+this is more or less what the table looks like :
+
+table
+|accountID|Years|
+|:-|:-|
+|1|2000|
+|1|2003|
+|1|2000|
+|1|2004|
+|1|2008|
+|2|2000|
+|2|2001|
+|2|2002|
+|2|2003|
+|2|2004|
+
+so my expected outcome is something like this: 
+
+|accountid|consecutive\_years|total\_years|
+|:-|:-|:-|
+|1|2|4|
+|2|4|5|
+
+
+
+
+
+Solution ---- 22/02/2022
+
+create table data1(
+acc_id int,
+years varchar(80),
+check_con int);
+
+insert into data1 (acc_id, years, check_con)
+values
+(1,2000,0),
+(1,2003,0),
+(1,2000,0),
+(1,2004,0),
+(1,2008,0),
+(2,2000,0),
+(2,2001,0),
+(2,2002,0),
+(2,2003,0),
+(2,2004,0);
+ 
+create view vdata1 as
+select acc_id, years, 
+ROW_NUMBER()OVER (PARTITION BY acc_id order by acc_id,years) as rowid
+FROM data1 ;
+
+
+
+SET @rid=1 --row id
+SET @aid=1 --Account ID
+SET @count=0 --count for consecutive years
+WHILE ( @rid <= 5 )  -- assume just 5
+  BEGIN
+      SELECT @chy = vdata1.years
+      FROM   vdata1
+      WHERE  acc_id = @aid
+             AND rowid = @rid
+
+      SELECT @chy2 = vdata1.years
+      FROM   vdata1
+      WHERE  acc_id = @aid
+             AND rowid = @rid + 1
+             AND rowid <= 5
+
+      SET @rid=@rid + 1
+
+      IF @chy2 - @chy = 1
+        SET @count=@count + 1
+  END
+
+SELECT @aid                  AS account_id,
+       @count + 1            AS consecutive_years,
+       Count(DISTINCT years) AS number_of_years
+FROM   data1
+WHERE  acc_id = @aid 
