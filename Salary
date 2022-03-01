@@ -58,29 +58,19 @@
 -------- Solution 1/03/2022------
 
 
+
 with recent (id, recent_m) as 
 (
 select id, max(month) recent_m from t_employee
 GROUP by id)
 
-select b.id, b.month, b.salary+
-case 
-when b.c1 is null then 0
-else c1
-end +
-case 
-when b.c2 is null then 0
-else c2
-end 
-from (
-select a.id, a.month, a.salary , 
-LAG(a.salary,1) over (partition by a.id order by a.month) c1,
-LAG(a.salary,2) over (partition by a.id order by a.month) c2
-from t_employee a join recent
-on a.id=recent.id
-where a.month<>recent.recent_m
-) as b
-order by 1,2 desc
+
+select t_employee.id,t_employee.month, 
+sum(salary) over(partition by t_employee.id order by month rows BETWEEN 2 preceding and current row) 
+from t_employee join recent
+on t_employee.id=recent.id
+where t_employee.month<>recent.recent_m
+ORDER by 1,2 desc
 
 
 
