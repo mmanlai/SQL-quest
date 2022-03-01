@@ -18,3 +18,41 @@
 -- Write a query to find the median of all numbers and name the result as median.
 
 
+_____SOLUTION _________
+
+
+
+-- check odd even 
+-- if odd take the middle one
+-- if even it should be middle 2 with avg
+
+DECLARE @a as int
+
+select @a=sum(frequency)/2
+from numbers
+if @a%2 = 0
+with t_temp (number,frequency,len) as 
+(
+select *,sum(frequency) over(order by number)  as len from numbers
+)
+select sum(number)/CONVERT(decimal(4,2) ,2) as median 
+from t_temp
+where len between @a and @a+1
+else 
+with t_temp (number,frequency,len) as 
+(
+select *,sum(frequency) over(order by number)  as len from numbers
+)
+select top 1 number as median from t_temp
+where len>=@a+1
+
+
+
+
+
+
+
+
+
+
+
