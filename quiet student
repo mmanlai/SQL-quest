@@ -73,3 +73,29 @@
 -- Student 2 and 5 have never got the highest or lowest in any of the exam.
 -- Since student 5 is not taking any exam, he is excluded from the result.
 -- So, we only return the information of Student 2.
+
+
+
+
+
+
+-------- Solution-------------
+
+with t_ranked(exam_id,student_id,score,rk) as (
+select *, dense_rank() over(partition by exam_id order by score) rk 
+from exam
+)  
+
+select distinct student.student_id , student.student_name from t_ranked join student
+on t_ranked.student_id=student.student_id
+where t_ranked.student_id not in 
+(
+select distinct student_id from t_ranked a join 
+(select exam_id, max(rk)as mx, min(rk)as mn from t_ranked
+group by exam_id) as b
+on a.exam_id=b.exam_id and a.rk=b.mx or a.rk=b.mn
+)
+
+
+
+
