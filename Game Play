@@ -15,7 +15,8 @@
 
 -- We define the install date of a player to be the first login day of that player.
 
--- We also define day 1 retention of some date X to be the number of players whose install date is X and they logged back in on the day right after X, divided by the number of players whose install date is X, rounded to 2 decimal places.
+-- We also define day 1 retention of some date X to be the number of players whose install date is X and they logged back in on the day right after X, 
+-- divided by the number of players whose install date is X, rounded to 2 decimal places.
 
 -- Write an SQL query that reports for each install date, the number of players that installed the game on that day and the day 1 retention.
 
