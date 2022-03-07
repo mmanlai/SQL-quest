@@ -27,3 +27,56 @@
 -- +------+------------+-----------+
 -- Note:
 -- Each day only have one row record, and the dates are increasing with id increasing.
+
+
+---- SOLUTION ---
+
+CREATE view tbl as
+(SELECT *, case 
+when datediff(day,visit_date,lead(visit_date,1) over (order by visit_date))=1 then 0
+when datediff(day,visit_date,lead(visit_date,1) over (order by visit_date)) is null then 0
+when datediff(day,visit_date,lead(visit_date,1) over (order by visit_date))<>1 then 1
+end lead, 
+row_number() over (order by visit_date) as w_id
+from stadium 
+where people>=100
+)
+
+declare @rid int,@count int, @df int ,@ct int
+select @rid=min(w_id),@ct=max(w_id) 
+from tbl
+set @count=0
+WHILE (@ct>0)
+  BEGIN
+      select @df=tbl.lead from tbl
+      where  tbl.w_id=@rid   
+      
+      IF (@df = 0)
+      begin
+        set @count=@count+1
+        set	@rid=@rid+1
+        Set @ct=@ct-1
+        if (@count>=3)
+     		 begin 
+      			select * from tbl
+    			where tbl.w_id>=@rid-@count and tbl.w_id<@rid
+      		 end                 
+        end 
+      if (@df = 1) 
+      begin
+      	set @count=@count+1
+        set @rid=@rid+1
+        if (@count>=3)
+     		 begin 
+      			select * from tbl
+    			where tbl.w_id>=@rid-@count and tbl.w_id<@rid
+      		 end   
+        set @count=0
+        Set @ct=@ct-1
+      end                
+  END
+  
+
+
+
+
