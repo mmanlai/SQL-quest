@@ -43,3 +43,27 @@
 -- Player 1 and 3 installed the game on 2016-03-01 but only player 1 logged back in on 2016-03-02 so the
 -- day 1 retention of 2016-03-01 is 1 / 2 = 0.50
 -- Player 2 installed the game on 2017-06-25 but didn't log back in on 2017-06-26 so the day 1 retention of 2017-06-25 is 0 / 1 = 0.00
+
+
+
+
+
+
+----- SOLUTION-----
+
+
+
+with tabl as (
+select * , min(event_date) over (partition by player_id) as install_dt,
+lead(event_date,1) over (partition by player_id order by event_date) as rt_dt
+from activity
+)
+
+select DISTINCT install_dt,count(distinct player_id), convert(decimal(10,2),sum(rt))/count(distinct player_id) from
+(select *, case when datediff(day,install_dt,rt_dt)=1 then 1
+else 0
+end as rt
+from tabl
+) as AA
+group by install_dt
+
