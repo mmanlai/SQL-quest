@@ -33,4 +33,31 @@
 -- |14   | C          | 2645   |
 -- +-----+------------+--------+
 
--- Solution
+----- SOLUTION-----
+
+
+WITH T1 AS(
+SELECT *, ROW_NUMBER() OVER (PARTITION BY company_name ORDER BY salary) AS RN 
+FROM employee
+)
+
+
+SELECT DISTINCT A.employee_id,A.company_name,A.salary FROM T1 A JOIN 
+(
+SELECT *, MAX(RN) OVER (PARTITION BY company_name)%2 AS EVENORODD, 
+case 
+when MAX(RN) OVER (PARTITION BY company_name)%2=0 then MAX(RN) OVER (PARTITION BY company_name)/2 
+when MAX(RN) OVER (PARTITION BY company_name)%2=1 then MAX(RN) OVER (PARTITION BY company_name)/2+1
+end AS STARTR,
+CASE 
+WHEN MAX(RN) OVER (PARTITION BY company_name)%2=0 THEN MAX(RN) OVER (PARTITION BY company_name)/2 +1 
+WHEN MAX(RN) OVER (PARTITION BY company_name)%2=1 THEN MAX(RN) OVER (PARTITION BY company_name)/2 +1 
+END AS ENDR
+FROM T1
+) AS AA
+ON A.RN BETWEEN AA.STARTR AND AA.ENDR AND A.company_name=AA.company_name
+
+
+
+
+
