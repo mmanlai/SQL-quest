@@ -86,3 +86,28 @@
 -- The answer for the user with id 1 is no because they sold nothing.
 -- The answer for the users with id 2 and 3 is yes because the brands of their second sold items are their favorite brands.
 -- The answer for the user with id 4 is no because the brand of their second sold item is not their favorite brand.
+'
+
+
+----- SOLUTION -------
+
+
+
+
+with t1 as (
+select b.item_brand,a.seller_id, rank() over (partition by seller_id order by order_date) as scnd from orders a join items b
+on a.item_id=b.item_id)
+
+select t1.seller_id, 
+case 
+when t1.item_brand=users.favorite_brand then 'YES'
+else 'NO' 
+end
+as yno
+from users join t1
+on users.user_id=t1.seller_id 
+where t1.scnd=2
+union 
+select user_id, 'NO' as yno from users
+where user_id not in (select seller_id from orders)
+
