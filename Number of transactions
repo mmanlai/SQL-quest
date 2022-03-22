@@ -81,4 +81,26 @@
 -- * For transactions_count = 3, The visit (9, "2020-01-25") did three transactions so visits_count = 1.
 -- * For transactions_count >= 4, No customers visited the bank and did more than three transactions so we will stop at transactions_count = 3
 
--- Solution
+
+
+
+
+---- Solution
+
+select t2.aa, count(bb) from 
+(select count(*) as aa , b.transaction_date as bb
+from visits a left join transactions b
+on a.visit_date = b.transaction_date and a.user_id=b.user_id
+where b.transaction_date is not null
+GROUP by b.transaction_date ) as t2
+GROUP by t2.aa
+
+union 
+
+select case 
+when b.transaction_date is null then 0
+end, count(*)
+from visits a left join transactions b
+on a.visit_date = b.transaction_date and a.user_id=b.user_id
+where b.transaction_date is null
+GROUP by b.transaction_date
